@@ -3,16 +3,15 @@ const fastify = require('fastify')({ logger: true });
 const cors = require('@fastify/cors');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
-const { Configuration, OpenAIApi } = require('openai');
+const OpenAI = require('openai'); // openai@4.x
 
 // Permitir acessos de qualquer origem
 fastify.register(cors);
 
-// Configuração da OpenAI usando variável de ambiente
-const configuration = new Configuration({
+// sintaxe da v4.x
+const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
-const openai = new OpenAIApi(configuration);
 
 // Função para gerar o PDF do relatório (ainda sem funcionar)
 function gerarPDF(dados, caminhoPDF) {
@@ -46,7 +45,7 @@ function gerarPDF(dados, caminhoPDF) {
 fastify.post('/atia', async (request, reply) => {
     const { nome, idade, sintomas, pressao, temperatura, comorbidades, alergias } = request.body;
 
-    // 🔍 Log de requisição recebida
+    // Log de requisição recebida
     console.log('\n Requisição recebida em /atia');
     console.log('Dados recebidos:', {
         nome, idade, sintomas, pressao, temperatura, comorbidades, alergias
@@ -80,13 +79,13 @@ fastify.post('/atia', async (request, reply) => {
 
     try {
         console.log('Enviando prompt para a OpenAI...');
-        const completion = await openai.createChatCompletion({
+        const completion = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: [{ role: 'user', content: prompt }],
             max_tokens: 500
         });
 
-        const respostaIA = completion.data.choices[0].message.content;
+        const respostaIA = completion.choices[0].message.content;
         console.log('Diagnóstico gerado pela IA:', respostaIA);
 
         const caminhoPDF = `./relatorio_${Date.now()}.pdf`;
