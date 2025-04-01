@@ -1,0 +1,27 @@
+name: Deploy to Glitch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar o repositório
+        uses: actions/checkout@v3
+
+      - name: Enviar código para o Glitch
+        env:
+          GLITCH_TOKEN: ${{ secrets.GLITCH_TOKEN }}
+        run: |
+          curl -X POST "https://api.glitch.com/project/git-import/github" \
+            -H "Authorization: Bearer $GLITCH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "projectId": "893c7c4e-2d65-4991-8c77-27248c5e02af",
+              "repo": "https://github.com/${{ github.repository }}",
+              "branch": "main"
+            }'
