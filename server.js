@@ -3,15 +3,16 @@ const fastify = require('fastify')({ logger: true });
 const cors = require('@fastify/cors');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
-const OpenAI = require('openai');
+const { Configuration, OpenAIApi } = require('openai'); // Atualização aqui
 
 // Permitir acessos de qualquer origem
 fastify.register(cors);
 
 // Configuração da OpenAI usando variável de ambiente
-const openai = new OpenAI({
+const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY
 });
+const openai = new OpenAIApi(configuration); // Atualização aqui
 
 // Função para gerar o PDF do relatório
 function gerarPDF(dados, caminhoPDF) {
@@ -43,16 +44,13 @@ function gerarPDF(dados, caminhoPDF) {
 
 // Rota principal que recebe os dados e retorna um diagnóstico
 fastify.post('/atia', async (request, reply) => {
-    // Extraindo dados da requisição
     const { nome, idade, sintomas, pressao, temperatura, comorbidades, alergias } = request.body;
-    
-    // Validação básica dos dados recebidos
+
     if (!nome || !idade || !sintomas) {
         reply.status(400).send({ error: 'Dados incompletos. Certifique-se de enviar nome, idade e sintomas.' });
         return;
     }
-    
-    // Montar a pergunta para a IA com formatação estruturada
+
     const prompt = `
     Você é a ATIA, uma Assistente de Triagem Médica Inteligente.
     Seu objetivo é avaliar os sintomas e fornecer um prognóstico baseado no Protocolo de Manchester.
@@ -72,29 +70,23 @@ fastify.post('/atia', async (request, reply) => {
     2. Especialidade Médica Recomendável: [médico indicado]
     3. Classificação no Protocolo de Manchester: [cor correspondente]
     `;
-    
+
     try {
-        // Chamar a IA da OpenAI
-        const response = await openai.createChatCompletion({
+        const completion = await openai.createChatCompletion({
             model: 'gpt-3.5-turbo',
             messages: [{ role: 'user', content: prompt }],
             max_tokens: 500
         });
-        
-        const respostaIA = response.data.choices[0].message.content;
-        
-        // Criar nome do arquivo PDF único
+
+        const respostaIA = completion.data.choices[0].message.content;
         const caminhoPDF = `./relatorio_${Date.now()}.pdf`;
-        
-        // Gerar o PDF com as informações e o diagnóstico
+
         await gerarPDF({
             nome, idade, sintomas, pressao, temperatura, comorbidades, alergias, diagnostico: respostaIA
         }, caminhoPDF);
-        
-        // Resposta para a Alexa ou site
+
         reply.send({ diagnostico: respostaIA, status: 'Relatório gerado com sucesso!' });
-        
-        // Remover o PDF do servidor após envio (opcional)
+
         fs.unlinkSync(caminhoPDF);
     } catch (error) {
         console.error('Erro ao chamar a OpenAI:', error);
@@ -102,12 +94,12 @@ fastify.post('/atia', async (request, reply) => {
     }
 });
 
-// Rota de teste para verificar se o backend está rodando
+// Rota de teste
 fastify.get('/', async (request, reply) => {
     return { mensagem: 'ATIA Backend rodando com sucesso!' };
 });
 
-// Iniciar o servidor na porta configurada
+// Iniciar o servidor
 const PORT = process.env.PORT || 3000;
 fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
