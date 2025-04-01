@@ -1,0 +1,35 @@
+{
+  "name": "atia-backend",
+  "version": "1.0.0",
+  "description": "Backend ATIA para Triagem Inteligente",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^8.2.0",
+    "@fastify/formbody": "^7.3.0",
+    "@fastify/static": "^6.9.0",
+    "@fastify/view": "^8.0.1",
+    "axios": "^1.8.3",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "fastify": "^4.22.2",
+    "handlebars": "^4.7.8",
+    "nodemailer": "^6.10.0",
+    "openai": "^4.87.3",
+    "pdfkit": "^0.16.0"
+  },
+  "engines": {
+    "node": "16.x"
+  },
+  "repository": {
+    "url": "https://glitch.com/edit/#!/atia-backend"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "glitch"
+  ]
+}
