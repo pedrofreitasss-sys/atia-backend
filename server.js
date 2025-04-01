@@ -71,10 +71,10 @@ Você receberá os seguintes dados do paciente:
 - Entre outros.
 
 Com base nessas informações, forneça uma avaliação clara e objetiva, respondendo no seguinte formato:
-1. **Prognóstico Clínico:** Descreva de forma direta o que pode estar acontecendo com o paciente.
-2. **Especialidade Médica Indicada:** Informe qual profissional da saúde deve ser procurado.
-3. **Classificação de Manchester:** Indique a cor correspondente à gravidade e o tempo máximo de espera.
-4. **Exame(s) Recomendado(s):** Caso julgue necessário, indique exames básicos que podem ajudar no diagnóstico.
+Prognóstico Clínico: Descreva de forma direta o que pode estar acontecendo com o paciente.
+Especialidade Médica Indicada: Informe qual profissional da saúde deve ser procurado.
+Classificação de Manchester: Indique a cor correspondente à gravidade e o tempo máximo de espera.
+Exame(s) Recomendado(s): Caso julgue necessário e relevante, indique exames básicos que podem ajudar no diagnóstico.
 
 Utilize linguagem acessível, sem termos técnicos excessivos, pois a resposta será ouvida por um paciente. Seja objetiva, empática e focada na orientação.
 `;
