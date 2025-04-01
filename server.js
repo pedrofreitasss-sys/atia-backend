@@ -1,9 +1,9 @@
-require('dotenv').config(); // Carrega as variáveis do ambiente
+require('dotenv').config(); // Carregando as variáveis do ambiente
 const fastify = require('fastify')({ logger: true });
 const cors = require('@fastify/cors');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
-const { Configuration, OpenAIApi } = require('openai'); // Atualização aqui
+const { Configuration, OpenAIApi } = require('openai');
 
 // Permitir acessos de qualquer origem
 fastify.register(cors);
@@ -12,9 +12,9 @@ fastify.register(cors);
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY
 });
-const openai = new OpenAIApi(configuration); // Atualização aqui
+const openai = new OpenAIApi(configuration);
 
-// Função para gerar o PDF do relatório
+// Função para gerar o PDF do relatório (ainda sem funcionar)
 function gerarPDF(dados, caminhoPDF) {
     return new Promise((resolve, reject) => {
         try {
@@ -46,7 +46,14 @@ function gerarPDF(dados, caminhoPDF) {
 fastify.post('/atia', async (request, reply) => {
     const { nome, idade, sintomas, pressao, temperatura, comorbidades, alergias } = request.body;
 
+    // 🔍 Log de requisição recebida
+    console.log('\n Requisição recebida em /atia');
+    console.log('Dados recebidos:', {
+        nome, idade, sintomas, pressao, temperatura, comorbidades, alergias
+    });
+
     if (!nome || !idade || !sintomas) {
+        console.warn('Dados incompletos! Nome, idade ou sintomas ausentes.');
         reply.status(400).send({ error: 'Dados incompletos. Certifique-se de enviar nome, idade e sintomas.' });
         return;
     }
@@ -72,6 +79,7 @@ fastify.post('/atia', async (request, reply) => {
     `;
 
     try {
+        console.log('Enviando prompt para a OpenAI...');
         const completion = await openai.createChatCompletion({
             model: 'gpt-3.5-turbo',
             messages: [{ role: 'user', content: prompt }],
@@ -79,6 +87,8 @@ fastify.post('/atia', async (request, reply) => {
         });
 
         const respostaIA = completion.data.choices[0].message.content;
+        console.log('Diagnóstico gerado pela IA:', respostaIA);
+
         const caminhoPDF = `./relatorio_${Date.now()}.pdf`;
 
         await gerarPDF({
@@ -89,7 +99,7 @@ fastify.post('/atia', async (request, reply) => {
 
         fs.unlinkSync(caminhoPDF);
     } catch (error) {
-        console.error('Erro ao chamar a OpenAI:', error);
+        console.error('Erro ao chamar a OpenAI:', error.message);
         reply.status(500).send({ error: 'Erro ao processar a solicitação.' });
     }
 });
@@ -99,7 +109,7 @@ fastify.get('/', async (request, reply) => {
     return { mensagem: 'ATIA Backend rodando com sucesso!' };
 });
 
-// Iniciar o servidor
+// Iniciando o servidor
 const PORT = process.env.PORT || 3000;
 fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
