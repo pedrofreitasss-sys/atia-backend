@@ -77,6 +77,12 @@ Classificação de Manchester: Indique a cor correspondente à gravidade e o tem
 Exame(s) Recomendado(s): Caso julgue necessário e relevante, indique exames básicos que podem ajudar no diagnóstico.
 
 Utilize linguagem acessível, sem termos técnicos excessivos, pois a resposta será ouvida por um paciente. Seja objetiva, empática e focada na orientação.
+
+A resposta tem que ser objetiva e não muito prolongada, exemplo de respostas que se espera: 
+"Prognóstico Clínico: Pedro pode estar enfrentando um quadro de problemas cardíacos, visto que apresenta dor no peito, falta de ar e tontura.
+Especialidade Médica Indicada: Cardiologia.
+Classificação de Manchester: Vermelha – Atendimento de emergência dentro de 10 minutos.
+Exames Recomendados: Eletrocardiograma, exames de sangue (enzimas cardíacas)."
 `;
     
     try {
