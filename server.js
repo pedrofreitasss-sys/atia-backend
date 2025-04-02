@@ -16,8 +16,8 @@ const openai = new OpenAI({
 });
 
 // Configuração do Twilio (ligação)
-const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
-const telefoneDestino = process.env.TELEFONE_DESTINO || '+550000000000';
+const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+const telefoneDestino = process.env.NUMERO_DESTINO_TESTE || '+550000000000';
 
 // Função para gerar o PDF do relatório
 function gerarPDF(dados, caminhoPDF) {
@@ -96,7 +96,7 @@ fastify.post('/atia', async (request, reply) => {
         if (respostaIA.toLowerCase().includes('vermelha')) {
             await twilioClient.calls.create({
                 to: telefoneDestino,
-                from: process.env.TWILIO_NUMERO,
+                from: process.env.TWILIO_PHONE_NUMBER,
                 twiml: `<Response><Say voice="alice" language="pt-BR">Paciente ${nome} está em estado grave e requer atendimento urgente. Diagnóstico: ${respostaIA}</Say></Response>`
             });
         }
@@ -109,7 +109,10 @@ fastify.post('/atia', async (request, reply) => {
 
         await axios.post(process.env.WHATSAPP_API_URL, formData, {
             headers: formData.getHeaders(),
-            auth: { username: process.env.WHATSAPP_API_USER, password: process.env.WHATSAPP_API_PASS }
+            auth: {
+                username: process.env.WHATSAPP_API_USER,
+                password: process.env.WHATSAPP_API_PASS
+            }
         });
 
         reply.send({ diagnostico: respostaIA, status: 'Relatório gerado e enviado com sucesso!' });
