@@ -61,7 +61,8 @@ fastify.post('/atia', async (request, reply) => {
         const nomePDF = `ficha_ATIA_${Date.now()}.pdf`;
 
         // Chama o Glitch para gerar o PDF
-        const pdfResponse = await axios.post('https://atia-web.glitch.me/gerar-pdf', {
+        const pdfResponse = await axios.post('https://ficha-pdf.glitch.me/gerar-pdf', {
+            
             nome,
             idade,
             sintomas,
