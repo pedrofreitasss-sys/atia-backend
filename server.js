@@ -7,8 +7,6 @@ const OpenAI = require('openai'); // openai@4.x
 const twilio = require('twilio'); // para ligação automatizada
 const axios = require('axios'); // para envio via API WhatsApp
 const FormData = require('form-data');
-const puppeteer = require('puppeteer'); // para gerar PDF profissional
-const cron = require('node-cron');
 
 // Permitir acessos de qualquer origem
 fastify.register(cors);
@@ -21,69 +19,6 @@ const openai = new OpenAI({
 // Configuração do Twilio (ligação)
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 const telefoneDestino = process.env.NUMERO_DESTINO_TESTE || '+550000000000';
-
-// Gera PDF personalizado com puppeteer
-async function gerarPDF(dados, nomeArquivo) {
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
-    const page = await browser.newPage();
-
-    const conteudoHTML = `
-    <html>
-      <head>
-        <style>
-          body { font-family: 'Times New Roman', serif; padding: 40px; font-size: 12pt; }
-          .titulo { text-align: center; font-size: 18pt; font-weight: bold; margin-bottom: 20px; }
-          .quadro { border: 1px solid #000; padding: 15px; margin-bottom: 15px; }
-          .qrcode { text-align: center; margin-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="titulo">Relatório ATIA – Triagem Inteligente</div>
-        <div class="quadro">
-          <p><strong>Nome:</strong> ${dados.nome}</p>
-          <p><strong>Idade:</strong> ${dados.idade}</p>
-          <p><strong>Sintomas:</strong> ${dados.sintomas}</p>
-          <p><strong>Pressão Arterial:</strong> ${dados.pressao}</p>
-          <p><strong>Temperatura:</strong> ${dados.temperatura}</p>
-          <p><strong>Comorbidades:</strong> ${dados.comorbidades}</p>
-          <p><strong>Alergias:</strong> ${dados.alergias}</p>
-        </div>
-        <div class="quadro">
-          <p><strong>Diagnóstico ATIA:</strong><br>${dados.diagnostico.replace(/\n/g, '<br>')}</p>
-        </div>
-        <div class="qrcode">
-          <img src="https://cdn.glitch.global/22a46256-a326-4e9a-b92e-f35048388683/ATIA%20QrCode.png?v=1743189247514" width="90">
-        </div>
-      </body>
-    </html>`;
-
-    await page.setContent(conteudoHTML, { waitUntil: 'networkidle0' });
-    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
-    await browser.close();
-
-    const caminhoFinal = path.join(__dirname, 'public');
-    if (!fs.existsSync(caminhoFinal)) fs.mkdirSync(caminhoFinal);
-    fs.writeFileSync(path.join(caminhoFinal, nomeArquivo), pdfBuffer);
-}
-
-// Excluir PDF após 10 minutos
-cron.schedule('* * * * *', () => {
-    const dir = path.join(__dirname, 'public');
-    fs.readdir(dir, (err, files) => {
-        if (err) return;
-        const agora = Date.now();
-        files.forEach(file => {
-            if (file.endsWith('.pdf')) {
-                const caminho = path.join(dir, file);
-                fs.stat(caminho, (err, stats) => {
-                    if (!err && agora - stats.mtimeMs > 10 * 60 * 1000) {
-                        fs.unlink(caminho, () => {});
-                    }
-                });
-            }
-        });
-    });
-});
 
 fastify.post('/atia', async (request, reply) => {
     const { nome, idade, sintomas, pressao, temperatura, comorbidades, alergias } = request.body;
@@ -123,10 +58,26 @@ fastify.post('/atia', async (request, reply) => {
         });
 
         const respostaIA = completion.choices[0].message.content;
-        const nomePDF = `relatorio_${Date.now()}.pdf`;
-        const caminhoPDF = path.join(__dirname, 'public', nomePDF);
+        const nomePDF = `ficha_ATIA_${Date.now()}.pdf`;
 
-        await gerarPDF({ nome, idade, sintomas, pressao, temperatura, comorbidades, alergias, diagnostico: respostaIA }, nomePDF);
+        // Chama o Glitch para gerar o PDF
+        const pdfResponse = await axios.post('https://atia-web.glitch.me/gerar-pdf', {
+            nome,
+            idade,
+            sintomas,
+            pressao,
+            temperatura,
+            comorbidades,
+            alergias,
+            diagnostico: respostaIA,
+            filename: nomePDF
+        });
+
+        const linkPDF = pdfResponse.data.download;
+
+        if (!linkPDF) {
+            throw new Error('PDF não foi gerado corretamente pelo Glitch');
+        }
 
         if (respostaIA.toLowerCase().includes('vermelha')) {
             await twilioClient.calls.create({
@@ -136,10 +87,12 @@ fastify.post('/atia', async (request, reply) => {
             });
         }
 
+        const bufferPDF = await axios.get(linkPDF, { responseType: 'stream' });
+
         const formData = new FormData();
         formData.append('number', telefoneDestino);
         formData.append('caption', `Ficha de triagem do paciente ${nome}`);
-        formData.append('document', fs.createReadStream(caminhoPDF));
+        formData.append('document', bufferPDF.data, { filename: nomePDF });
 
         await axios.post(process.env.WHATSAPP_API_URL, formData, {
             headers: formData.getHeaders(),
