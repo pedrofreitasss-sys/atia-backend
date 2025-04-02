@@ -17,6 +17,7 @@
     "dotenv": "^16.4.7",
     "fastify": "^4.22.2",
     "handlebars": "^4.7.8",
+    "node-cron": "^3.0.3",
     "nodemailer": "^6.10.0",
     "openai": "^4.87.3",
     "puppeteer": "^13.7.0",
