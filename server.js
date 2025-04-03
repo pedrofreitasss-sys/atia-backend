@@ -74,7 +74,7 @@ fastify.post('/atia', async (request, reply) => {
         });
 
         const linkPDF = pdfResponse.data.download;
-        console.log('Link do PDF:', linkPDF);
+        console.log('🔗 Link do PDF:', linkPDF);
 
         if (!linkPDF) {
             throw new Error('PDF não foi gerado corretamente pelo Glitch');
@@ -88,24 +88,30 @@ fastify.post('/atia', async (request, reply) => {
             });
         }
 
-        const bufferPDF = await axios.get(linkPDF, { responseType: 'stream' });
+        // Upload do PDF para a UltraMsg
+        const formUpload = new FormData();
+        formUpload.append('file', fs.createReadStream(path.resolve(__dirname, 'caminho/para/seu/arquivo.pdf')));
+        formUpload.append('token', process.env.WHATSAPP_API_TOKEN);
 
+        const uploadResponse = await axios.post(`https://api.ultramsg.com/${process.env.INSTANCE_ID}/media/upload`, formUpload, {
+            headers: formUpload.getHeaders()
+        });
+
+        const documentUrl = uploadResponse.data.url;
+
+        // Envio do documento via WhatsApp
         const formData = new FormData();
-        formData.append('number', telefoneDestino);
+        formData.append('token', process.env.WHATSAPP_API_TOKEN);
+        formData.append('to', telefoneDestino);
+        formData.append('filename', nomePDF);
+        formData.append('document', documentUrl);
         formData.append('caption', `Ficha de triagem do paciente ${nome}`);
-        formData.append('document', bufferPDF.data, { filename: nomePDF });
 
-        try {
-            const urlComToken = `https://api.ultramsg.com/instance112496/messages/document?token=xdub9yhnpo8zwtww`;
+        const respostaWhatsapp = await axios.post(`https://api.ultramsg.com/${process.env.INSTANCE_ID}/messages/document`, formData, {
+            headers: formData.getHeaders()
+        });
 
-            const respostaWhatsapp = await axios.post(urlComToken, formData, {
-                headers: formData.getHeaders()
-            });
-
-            console.log('Enviado para o WhatsApp com sucesso:', respostaWhatsapp.data);
-        } catch (err) {
-            console.error('Erro ao enviar para o WhatsApp:', err.response?.data || err.message);
-        }
+        console.log('Enviado para o WhatsApp com sucesso:', respostaWhatsapp.data);
 
         reply.send({ diagnostico: respostaIA, status: 'Relatório gerado e enviado com sucesso!' });
 
@@ -124,8 +130,6 @@ fastify.register(require('@fastify/static'), {
     prefix: '/baixar/',
 });
 
-const PORT = process.env.PORT || 3000;
-fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
-    if (err) throw err;
-    console.log(`Servidor rodando em ${address}`);
-});
+const PORT =
+::contentReference[oaicite:6]{index=6}
+ 
