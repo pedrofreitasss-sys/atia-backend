@@ -62,7 +62,6 @@ fastify.post('/atia', async (request, reply) => {
 
         // Chama o Glitch para gerar o PDF
         const pdfResponse = await axios.post('https://ficha-pdf.glitch.me/gerar-pdf', {
-            
             nome,
             idade,
             sintomas,
@@ -75,6 +74,7 @@ fastify.post('/atia', async (request, reply) => {
         });
 
         const linkPDF = pdfResponse.data.download;
+        console.log('🔗 Link do PDF:', linkPDF);
 
         if (!linkPDF) {
             throw new Error('PDF não foi gerado corretamente pelo Glitch');
@@ -95,13 +95,19 @@ fastify.post('/atia', async (request, reply) => {
         formData.append('caption', `Ficha de triagem do paciente ${nome}`);
         formData.append('document', bufferPDF.data, { filename: nomePDF });
 
-        await axios.post(process.env.WHATSAPP_API_URL, formData, {
-            headers: formData.getHeaders(),
-            auth: {
-                username: process.env.WHATSAPP_API_USER,
-                password: process.env.WHATSAPP_API_PASS
-            }
-        });
+        try {
+            const respostaWhatsapp = await axios.post(process.env.WHATSAPP_API_URL, formData, {
+                headers: formData.getHeaders(),
+                auth: {
+                    username: process.env.WHATSAPP_API_USER,
+                    password: process.env.WHATSAPP_API_PASS
+                }
+            });
+
+            console.log('Enviado para o WhatsApp com sucesso:', respostaWhatsapp.data);
+        } catch (err) {
+            console.error('Erro ao enviar para o WhatsApp:', err.response?.data || err.message);
+        }
 
         reply.send({ diagnostico: respostaIA, status: 'Relatório gerado e enviado com sucesso!' });
 
