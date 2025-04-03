@@ -96,13 +96,10 @@ fastify.post('/atia', async (request, reply) => {
         formData.append('document', bufferPDF.data, { filename: nomePDF });
 
         try {
-            const respostaWhatsapp = await axios.post(process.env.WHATSAPP_API_URL, formData, {
-                headers: formData.getHeaders(),
-                auth: {
-                    username: process.env.WHATSAPP_API_USER,
-                    password: process.env.WHATSAPP_API_PASS
-                }
-            });
+            const urlComToken = `${process.env.WHATSAPP_API_URL}?token=${process.env.WHATSAPP_API_TOKEN}`;
+            await axios.post(urlComToken, formData, {
+            headers: formData.getHeaders()
+             });
 
             console.log('Enviado para o WhatsApp com sucesso:', respostaWhatsapp.data);
         } catch (err) {
