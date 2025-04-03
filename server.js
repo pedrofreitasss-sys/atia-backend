@@ -129,7 +129,3 @@ fastify.register(require('@fastify/static'), {
     root: path.join(__dirname, 'public'),
     prefix: '/baixar/',
 });
-
-const PORT =
-::contentReference[oaicite:6]{index=6}
- 
