@@ -74,7 +74,7 @@ fastify.post('/atia', async (request, reply) => {
         });
 
         const linkPDF = pdfResponse.data.download;
-        console.log('🔗 Link do PDF:', linkPDF);
+        console.log('Link do PDF:', linkPDF);
 
         if (!linkPDF) {
             throw new Error('PDF não foi gerado corretamente pelo Glitch');
@@ -88,34 +88,8 @@ fastify.post('/atia', async (request, reply) => {
             });
         }
 
-        // Upload do PDF para a UltraMsg (corrigido para usar o link do Glitch)
-        const pdfBuffer = await axios.get(linkPDF, { responseType: 'arraybuffer' });
-
-        const formUpload = new FormData();
-        formUpload.append('file', Buffer.from(pdfBuffer.data), nomePDF);
-        formUpload.append('token', process.env.WHATSAPP_API_TOKEN);
-
-        const uploadResponse = await axios.post(`https://api.ultramsg.com/${process.env.INSTANCE_ID}/media/upload`, formUpload, {
-            headers: formUpload.getHeaders()
-        });
-
-        const documentUrl = uploadResponse.data.url;
-
-        // Envio do documento via WhatsApp
-        const formData = new FormData();
-        formData.append('token', process.env.WHATSAPP_API_TOKEN);
-        formData.append('to', telefoneDestino);
-        formData.append('filename', nomePDF);
-        formData.append('document', documentUrl);
-        formData.append('caption', `Ficha de triagem do paciente ${nome}`);
-
-        const respostaWhatsapp = await axios.post(`https://api.ultramsg.com/${process.env.INSTANCE_ID}/messages/document`, formData, {
-            headers: formData.getHeaders()
-        });
-
-        console.log('Enviado para o WhatsApp com sucesso:', respostaWhatsapp.data);
-
-        reply.send({ diagnostico: respostaIA, status: 'Relatório gerado e enviado com sucesso!' });
+        // Aqui termina a lógica. PDF será enviado por outro backend.
+        reply.send({ diagnostico: respostaIA, linkFicha: linkPDF, status: 'Relatório gerado com sucesso!' });
 
     } catch (error) {
         console.error('Erro ao processar:', error.message);
