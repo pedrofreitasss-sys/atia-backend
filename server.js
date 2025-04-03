@@ -123,9 +123,17 @@ fastify.post('/atia', async (request, reply) => {
 
 fastify.get('/', async (request, reply) => {
     return { mensagem: 'ATIA Backend rodando com sucesso!' };
+    
 });
 
 fastify.register(require('@fastify/static'), {
     root: path.join(__dirname, 'public'),
     prefix: '/baixar/',
+
+const PORT = process.env.PORT || 3000;
+fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
+    if (err) throw err;
+    console.log(`Servidor rodando em ${address}`);
+});
+    
 });
