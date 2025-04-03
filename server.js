@@ -88,9 +88,11 @@ fastify.post('/atia', async (request, reply) => {
             });
         }
 
-        // Upload do PDF para a UltraMsg
+        // Upload do PDF para a UltraMsg (corrigido para usar o link do Glitch)
+        const pdfBuffer = await axios.get(linkPDF, { responseType: 'arraybuffer' });
+
         const formUpload = new FormData();
-        formUpload.append('file', fs.createReadStream(path.resolve(__dirname, 'caminho/para/seu/arquivo.pdf')));
+        formUpload.append('file', Buffer.from(pdfBuffer.data), nomePDF);
         formUpload.append('token', process.env.WHATSAPP_API_TOKEN);
 
         const uploadResponse = await axios.post(`https://api.ultramsg.com/${process.env.INSTANCE_ID}/media/upload`, formUpload, {
@@ -123,7 +125,6 @@ fastify.post('/atia', async (request, reply) => {
 
 fastify.get('/', async (request, reply) => {
     return { mensagem: 'ATIA Backend rodando com sucesso!' };
-    
 });
 
 fastify.register(require('@fastify/static'), {
@@ -136,4 +137,3 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     console.log(`Servidor rodando em ${address}`);
 });
-
