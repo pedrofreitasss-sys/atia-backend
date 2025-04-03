@@ -95,16 +95,17 @@ fastify.post('/atia', async (request, reply) => {
         formData.append('caption', `Ficha de triagem do paciente ${nome}`);
         formData.append('document', bufferPDF.data, { filename: nomePDF });
 
-        try {
-            const urlComToken = `${process.env.WHATSAPP_API_URL}?token=${process.env.WHATSAPP_API_TOKEN}`;
-            await axios.post(urlComToken, formData, {
-            headers: formData.getHeaders()
-             });
+      try {
+    const urlComToken = `${process.env.WHATSAPP_API_URL}?token=${process.env.WHATSAPP_API_TOKEN}`;
+    
+    const respostaWhatsapp = await axios.post(urlComToken, formData, {
+        headers: formData.getHeaders()
+    });
 
-            console.log('Enviado para o WhatsApp com sucesso:', respostaWhatsapp.data);
-        } catch (err) {
-            console.error('Erro ao enviar para o WhatsApp:', err.response?.data || err.message);
-        }
+    console.log('Enviado para o WhatsApp com sucesso:', respostaWhatsapp.data);
+} catch (err) {
+    console.error('Erro ao enviar para o WhatsApp:', err.response?.data || err.message);
+}
 
         reply.send({ diagnostico: respostaIA, status: 'Relatório gerado e enviado com sucesso!' });
 
