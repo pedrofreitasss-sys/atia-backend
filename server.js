@@ -21,10 +21,36 @@ const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_A
 const telefoneDestino = process.env.NUMERO_DESTINO_TESTE || '+550000000000';
 
 fastify.post('/atia', async (request, reply) => {
-    const { nome, idade, sintomas, pressao, temperatura, comorbidades, alergias } = request.body;
+  const {
+    nome,
+    idade,
+    genero,
+    sintomas,
+    pressao,
+    temperatura,
+    frequencia_cardiaca,
+    saturacao,
+    doencas_preexistentes,
+    uso_medicamentos,
+    alergias,
+    cirurgias_anteriores,
+    habitos,
+    historico_genetico,
+    nivel_consciencia,
+    dor,
+    dificuldade_respiratoria,
+    sinais_choque,
+    inicio_sintomas,
+    numero 
+  } = request.body;
 
-    console.log('\n Requisição recebida em /atia');
-    console.log('Dados recebidos:', { nome, idade, sintomas, pressao, temperatura, comorbidades, alergias });
+  console.log('\n Requisição recebida em /atia');
+  console.log('Dados recebidos:', {
+    nome, idade, genero, sintomas, pressao, temperatura, frequencia_cardiaca, saturacao,
+    doencas_preexistentes, uso_medicamentos, alergias, cirurgias_anteriores, habitos,
+    historico_genetico, nivel_consciencia, dor, dificuldade_respiratoria, sinais_choque,
+    inicio_sintomas, numero
+  });
 
     if (!nome || !idade || !sintomas) {
         reply.status(400).send({ error: 'Dados incompletos. Certifique-se de enviar nome, idade e sintomas.' });
@@ -37,15 +63,27 @@ fastify.post('/atia', async (request, reply) => {
     Você receberá os seguintes dados do paciente:
     - Nome: ${nome}
     - Idade: ${idade}
+    - Gênero: ${genero}
     - Sintomas: ${sintomas}
     - Pressão Arterial: ${pressao}
     - Temperatura: ${temperatura}
-    - Comorbidades: ${comorbidades}
+    - Frequência Cardíaca: ${frequencia_cardiaca}
+    - Saturação de Oxigênio: ${saturacao}
+    - Doenças Preexistentes: ${doencas_preexistentes}
+    - Uso de Medicamentos: ${uso_medicamentos}
     - Alergias: ${alergias}
+    - Cirurgias Anteriores: ${cirurgias_anteriores}
+    - Hábitos: ${habitos}
+    - Histórico Genético Familiar: ${historico_genetico}
+    - Nível de Consciência: ${nivel_consciencia}
+    - Dor: ${dor}
+    - Dificuldade Respiratória: ${dificuldade_respiratoria}
+    - Sinais de Choque: ${sinais_choque}
+    - Início dos Sintomas: ${inicio_sintomas} dias atrás
 
     Com base nessas informações, forneça uma avaliação clara e objetiva, respondendo no seguinte formato:
-    Prognóstico Clínico: Descreva de forma direta o que pode estar acontecendo com o paciente.
-    Especialidade Médica Indicada: Informe qual profissional da saúde deve ser procurado.
+    Prognóstico Clínico: Descreva de forma direta, empática e profissional (como se fosse um médico) o que pode estar acontecendo com o paciente.
+    Especialidade Médica Indicada: Informe qual profissional da saúde deve ser procurado para tratar da condição dele.
     Classificação de Manchester: Indique a cor correspondente à gravidade e o tempo máximo de espera.
     Exame(s) Recomendado(s): Caso julgue necessário e relevante, indique exames básicos que podem ajudar no diagnóstico.
     `;
@@ -64,11 +102,24 @@ fastify.post('/atia', async (request, reply) => {
         const pdfResponse = await axios.post('https://ficha-pdf.glitch.me/gerar-pdf', {
             nome,
             idade,
+            genero,
             sintomas,
             pressao,
             temperatura,
-            comorbidades,
+            frequencia_cardiaca,
+            saturacao,
+            doencas_preexistentes,
+            uso_medicamentos,
             alergias,
+            cirurgias_anteriores,
+            habitos,
+            historico_genetico,
+            nivel_consciencia,
+            dor,
+            dificuldade_respiratoria,
+            sinais_choque,
+            inicio_sintomas,
+            numero,
             diagnostico: respostaIA,
             filename: nomePDF
         });
