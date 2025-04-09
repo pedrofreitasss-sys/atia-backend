@@ -4,8 +4,6 @@ const cors = require('@fastify/cors');
 const fs = require('fs');
 const path = require('path');
 const OpenAI = require('openai'); // openai@4.x
-const twilio = require('twilio'); // para ligação automatizada
-const axios = require('axios'); // para envio via API WhatsApp
 const FormData = require('form-data');
 
 // Permitir acessos de qualquer origem
@@ -15,10 +13,6 @@ fastify.register(cors);
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
-
-// Configuração do Twilio (ligação)
-const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-const telefoneDestino = process.env.NUMERO_DESTINO_TESTE || '+550000000000';
 
 fastify.post('/atia', async (request, reply) => {
   const {
@@ -64,7 +58,7 @@ fastify.post('/atia', async (request, reply) => {
       model: 'gpt-3.5-turbo',
       messages: [{
         role: 'user',
-        content: `Converta este e-mail falado para formato válido: "${email}". Retorne apenas o e-mail final.`
+        content: `Converta este e-mail falado para um formato válido de e-mail: "${email}". Retorne apenas o e-mail final.`
       }],
       max_tokens: 20
     });
