@@ -52,23 +52,6 @@ fastify.post('/atia', async (request, reply) => {
     return;
   }
 
-  // Usar ChatGPT para transformar e-mail falado em formato válido
-  let emailCorrigido = email;
-  try {
-    const correcaoEmail = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{
-        role: 'user',
-        content: `Converta este e-mail falado para um formato válido de e-mail: "${email}". Retorne apenas o e-mail final.`
-      }],
-      max_tokens: 20
-    });
-    emailCorrigido = correcaoEmail.choices[0].message.content.trim();
-    console.log('E-mail convertido:', emailCorrigido);
-  } catch (error) {
-    console.error('Erro ao converter e-mail com o ChatGPT:', error.message);
-  }
-
   const prompt = `
   Você é a ATIA, uma Assistente de Triagem Médica Inteligente, especializada em análise de sintomas e risco clínico com base no Protocolo de Manchester.
 
@@ -131,7 +114,7 @@ fastify.post('/atia', async (request, reply) => {
       dificuldade_respiratoria,
       sinais_choque,
       inicio_sintomas,
-      email: emailCorrigido,
+      email,
       diagnostico: respostaIA,
       filename: nomePDF
     });
@@ -141,14 +124,6 @@ fastify.post('/atia', async (request, reply) => {
 
     if (!linkPDF) {
       throw new Error('PDF não foi gerado corretamente pelo Glitch');
-    }
-
-    if (respostaIA.toLowerCase().includes('vermelha')) {
-      await twilioClient.calls.create({
-        to: telefoneDestino,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        twiml: `<Response><Say voice="alice" language="pt-BR">Paciente ${nome} está em estado grave. Diagnóstico: ${respostaIA}</Say></Response>`
-      });
     }
 
     // Aqui termina a lógica. PDF será enviado por outro backend.
