@@ -93,8 +93,14 @@ fastify.post('/atia', async (request, reply) => {
     const respostaIA = completion.choices[0].message.content;
     const nomePDF = `ficha_ATIA_${Date.now()}.pdf`;
 
-    // Chama o Glitch para gerar o PDF
-    const pdfResponse = await axios.post('https://ficha-pdf.glitch.me/gerar-pdf', {
+    // RESPOSTA IMEDIATA para a Skill com o diagnóstico
+    reply.send({
+      diagnostico: respostaIA,
+      status: 'Diagnóstico concluído com sucesso. A ficha será enviada por e-mail separadamente.'
+    });
+
+    // 2. Envia os dados ao Glitch para gerar e enviar o PDF separadamente
+    axios.post('https://ficha-pdf.glitch.me/gerar-pdf', {
       nome,
       idade,
       genero,
@@ -117,17 +123,11 @@ fastify.post('/atia', async (request, reply) => {
       email,
       diagnostico: respostaIA,
       filename: nomePDF
+    }).then(() => {
+      console.log("PDF enviado para geração no Glitch.");
+    }).catch((err) => {
+      console.error("Erro ao enviar dados ao Glitch:", err.message);
     });
-
-    const linkPDF = pdfResponse.data.download;
-    console.log('Link do PDF:', linkPDF);
-
-    if (!linkPDF) {
-      throw new Error('PDF não foi gerado corretamente pelo Glitch');
-    }
-
-    // Aqui termina a lógica. PDF será enviado por outro backend.
-    reply.send({ diagnostico: respostaIA, linkFicha: linkPDF, status: 'Relatório gerado com sucesso!' });
 
   } catch (error) {
     console.error('Erro ao processar:', error.message);
