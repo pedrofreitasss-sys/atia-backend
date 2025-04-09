@@ -4,6 +4,7 @@ const cors = require('@fastify/cors');
 const fs = require('fs');
 const path = require('path');
 const OpenAI = require('openai'); // openai@4.x
+const axios = require('axios');
 const FormData = require('form-data');
 
 // Permitir acessos de qualquer origem
