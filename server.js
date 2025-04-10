@@ -16,7 +16,7 @@ const openai = new OpenAI({
 });
 
 fastify.post('/atia', async (request, reply) => {
-  const {
+  let {
     nome,
     idade,
     genero,
@@ -50,6 +50,31 @@ fastify.post('/atia', async (request, reply) => {
   if (!nome || !idade || !sintomas || !email) {
     reply.status(400).send({ error: 'Dados incompletos. Certifique-se de enviar nome, idade, sintomas e e-mail.' });
     return;
+  }
+
+  // Conversão da idade falada para formato de data (dd/mm/aaaa)
+  try {
+    const promptData = `
+Você receberá uma data de nascimento falada por voz em português. 
+Sua tarefa é converter isso para o formato dd/mm/aaaa. 
+Retorne apenas a data formatada corretamente. 
+Exemplo de entrada: "dois de maio de mil novecentos e noventa e sete"
+Saída esperada: 02/05/1997
+
+Entrada: ${idade}
+    `;
+
+    const respostaData = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: promptData }],
+      max_tokens: 20
+    });
+
+    const idadeFormatada = respostaData.choices[0].message.content.trim();
+    console.log("Idade convertida para data:", idadeFormatada);
+    idade = idadeFormatada;
+  } catch (erro) {
+    console.error("Erro ao converter a idade:", erro.message);
   }
 
   const prompt = `
