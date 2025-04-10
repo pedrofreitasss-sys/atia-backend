@@ -110,12 +110,13 @@ Você é um corretor ortográfico médico. Irei te enviar um objeto JSON com dad
 
 Regras:
 - Corrija ortografia, pontuação e gramática conforme as normas do português brasileiro.
-- Nomes próprios devem começar com letra maiúscula.
+- Apenas nomes próprios (como pessoas, medicamentos, locais) devem começar com letra maiúscula.
+- Frases comuns devem seguir a norma-padrão, com apenas a primeira palavra em maiúscula.
 - Converta números por extenso para numerais (ex: "trinta e seis ponto oito" → "36.8").
 - Separe com vírgulas onde necessário, como em "perna, 10".
 - Para **alergias**: 
-   - Se o valor for "não" ou "nenhuma", retorne exatamente: "o paciente não informou quadros de alergias."
-   - Caso contrário, retorne: "o paciente tem alergia(s) a: ..."
+- Se o valor for "não" ou "nenhuma", retorne exatamente: "o paciente não informou quadros de alergias."
+- Caso contrário, retorne: "o paciente tem alergia(s) a: ..."
 
 Retorne apenas o JSON corrigido:
 
