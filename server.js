@@ -71,7 +71,34 @@ Entrada: ${idade}
 
     const idadeFormatada = respostaData.choices[0].message.content.trim();
     console.log("Idade convertida para data:", idadeFormatada);
-    idade = idadeFormatada;
+
+    // Calcular idade detalhada
+    try {
+      const [dia, mes, ano] = idadeFormatada.split('/').map(Number);
+      const nascimento = new Date(ano, mes - 1, dia);
+      const hoje = new Date();
+
+      let anos = hoje.getFullYear() - nascimento.getFullYear();
+      let meses = hoje.getMonth() - nascimento.getMonth();
+      let dias = hoje.getDate() - nascimento.getDate();
+
+      if (dias < 0) {
+        meses--;
+        dias += new Date(hoje.getFullYear(), hoje.getMonth(), 0).getDate();
+      }
+
+      if (meses < 0) {
+        anos--;
+        meses += 12;
+      }
+
+      idade = `${idadeFormatada} (${anos} anos / ${meses} meses / ${dias} dias)`;
+      console.log("Idade formatada completa:", idade);
+    } catch (erro) {
+      console.error("Erro ao calcular idade completa:", erro.message);
+      idade = idadeFormatada; // fallback para apenas a data
+    }
+
   } catch (erro) {
     console.error("Erro ao converter a idade:", erro.message);
   }
