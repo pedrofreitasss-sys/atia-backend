@@ -53,35 +53,35 @@ fastify.post('/atia', async (request, reply) => {
   }
 
   const prompt = `
-  Você é a ATIA, uma Assistente de Triagem Médica Inteligente, especializada em análise de sintomas e risco clínico com base no Protocolo de Manchester.
+Você é a ATIA, uma Assistente de Triagem Médica Inteligente, especializada em análise de sintomas e risco clínico com base no Protocolo de Manchester.
 
-  Você receberá os seguintes dados do paciente:
-  - Nome: ${nome}
-  - Idade: ${idade}
-  - Gênero: ${genero}
-  - Sintomas: ${sintomas}
-  - Pressão Arterial: ${pressao}
-  - Temperatura: ${temperatura}
-  - Frequência Cardíaca: ${frequencia_cardiaca}
-  - Saturação de Oxigênio: ${saturacao}
-  - Doenças Preexistentes: ${doencas_preexistentes}
-  - Uso de Medicamentos: ${uso_medicamentos}
-  - Alergias: ${alergias}
-  - Cirurgias Anteriores: ${cirurgias_anteriores}
-  - Hábitos: ${habitos}
-  - Histórico Genético Familiar: ${historico_genetico}
-  - Nível de Consciência: ${nivel_consciencia}
-  - Dor: ${dor}
-  - Dificuldade Respiratória: ${dificuldade_respiratoria}
-  - Sinais de Choque: ${sinais_choque}
-  - Início dos Sintomas: ${inicio_sintomas} dias atrás
+Você receberá os seguintes dados do paciente:
+- Nome: ${nome}
+- Idade: ${idade}
+- Gênero: ${genero}
+- Sintomas: ${sintomas}
+- Pressão Arterial: ${pressao}
+- Temperatura: ${temperatura}
+- Frequência Cardíaca: ${frequencia_cardiaca}
+- Saturação de Oxigênio: ${saturacao}
+- Doenças Preexistentes: ${doencas_preexistentes}
+- Uso de Medicamentos: ${uso_medicamentos}
+- Alergias: ${alergias}
+- Cirurgias Anteriores: ${cirurgias_anteriores}
+- Hábitos: ${habitos}
+- Histórico Genético Familiar: ${historico_genetico}
+- Nível de Consciência: ${nivel_consciencia}
+- Dor: ${dor}
+- Dificuldade Respiratória: ${dificuldade_respiratoria}
+- Sinais de Choque: ${sinais_choque}
+- Início dos Sintomas: ${inicio_sintomas} dias atrás
 
-  Com base nessas informações, forneça uma avaliação clara e objetiva, respondendo no seguinte formato:
-  Prognóstico Clínico: Descreva de forma direta, empática e profissional (como se fosse um médico) o que pode estar acontecendo com o paciente.
-  Especialidade Médica Indicada: Informe qual profissional da saúde deve ser procurado para tratar da condição dele.
-  Classificação de Manchester: Indique a cor correspondente à gravidade e o tempo máximo de espera.
-  Exame(s) Recomendado(s): Caso julgue necessário e relevante, indique exames básicos que podem ajudar no diagnóstico.
-  `;
+Com base nessas informações, forneça uma avaliação clara e objetiva, respondendo no seguinte formato:
+- Avaliação Inicial: Com base nas informações relatadas, descreva de forma geral e cuidadosa a possibilidade de condições comuns, **sem emitir diagnóstico médico**. Use linguagem acessível e empática, sem termos técnicos, e sempre recomende procurar um profissional de saúde qualificado para avaliação presencial.
+- Especialidade Médica Indicada: Informe qual profissional da saúde deve ser procurado para acompanhar a condição relatada.
+- Classificação de Manchester: Indique a cor correspondente à gravidade e o tempo máximo de espera segundo o protocolo de Manchester.
+- Exame(s) Recomendado(s): Caso julgue necessário, indique exames básicos que possam ajudar na investigação inicial.
+`;
 
   try {
     const completion = await openai.chat.completions.create({
