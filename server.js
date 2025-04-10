@@ -72,32 +72,35 @@ Entrada: ${idade}
     const idadeFormatada = respostaData.choices[0].message.content.trim();
     console.log("Idade convertida para data:", idadeFormatada);
 
+    // Corrigir caso venha com "Saída:" ou prefixos extras
+    const apenasData = idadeFormatada.match(/\d{2}\/\d{2}\/\d{4}/)?.[0] || idadeFormatada;
+
     // Calcular idade detalhada
     try {
-      const [dia, mes, ano] = idadeFormatada.split('/').map(Number);
-      const nascimento = new Date(ano, mes - 1, dia);
-      const hoje = new Date();
+  const [dia, mes, ano] = apenasData.split('/').map(Number);
+  const nascimento = new Date(ano, mes - 1, dia);
+  const hoje = new Date();
 
-      let anos = hoje.getFullYear() - nascimento.getFullYear();
-      let meses = hoje.getMonth() - nascimento.getMonth();
-      let dias = hoje.getDate() - nascimento.getDate();
+  let anos = hoje.getFullYear() - nascimento.getFullYear();
+  let meses = hoje.getMonth() - nascimento.getMonth();
+  let dias = hoje.getDate() - nascimento.getDate();
 
-      if (dias < 0) {
-        meses--;
-        dias += new Date(hoje.getFullYear(), hoje.getMonth(), 0).getDate();
-      }
+  if (dias < 0) {
+    meses--;
+    dias += new Date(hoje.getFullYear(), hoje.getMonth(), 0).getDate();
+  }
 
-      if (meses < 0) {
-        anos--;
-        meses += 12;
-      }
+  if (meses < 0) {
+    anos--;
+    meses += 12;
+  }
 
-      idade = `${idadeFormatada} (${anos} anos / ${meses} meses / ${dias} dias)`;
-      console.log("Idade formatada completa:", idade);
-    } catch (erro) {
-      console.error("Erro ao calcular idade completa:", erro.message);
-      idade = idadeFormatada; // fallback para apenas a data
-    }
+  idade = `${apenasData} (${anos} anos / ${meses} meses / ${dias} dias)`;
+  console.log("Idade formatada completa:", idade);
+} catch (erro) {
+  console.error("Erro ao calcular idade completa:", erro.message);
+  idade = apenasData;
+}
 
   } catch (erro) {
     console.error("Erro ao converter a idade:", erro.message);
@@ -110,13 +113,14 @@ Você é um corretor ortográfico médico. Irei te enviar um objeto JSON com dad
 
 Regras:
 - Corrija ortografia, pontuação e gramática conforme as normas do português brasileiro.
-- Apenas nomes próprios (como pessoas, medicamentos, locais) devem começar com letra maiúscula.
-- Frases comuns devem seguir a norma-padrão, com apenas a primeira palavra em maiúscula.
+- Apenas nomes próprios (como nomes de pessoas, medicamentos, lugares) devem começar com letra maiúscula.
+- Frases comuns devem começar apenas com a primeira letra maiúscula.
+- NÃO transforme tudo em maiúsculas estilo título (ex: "Dor Generalizada" está errado).
 - Converta números por extenso para numerais (ex: "trinta e seis ponto oito" → "36.8").
-- Separe com vírgulas onde necessário, como em "perna, 10".
-- Para **alergias**: 
-- Se o valor for "não" ou "nenhuma", retorne exatamente: "o paciente não informou quadros de alergias."
-- Caso contrário, retorne: "o paciente tem alergia(s) a: ..."
+- Separe com vírgulas onde necessário, como em "perna, 10", "ombro, 5", "corpo, 8".
+- Para alergias:
+   - Se o valor for "não" ou "nenhuma", retorne exatamente: "o paciente não informou quadros de alergias."
+   - Caso contrário, retorne: "o paciente tem alergia(s) a: ..."
 
 Retorne apenas o JSON corrigido:
 
@@ -132,7 +136,7 @@ ${JSON.stringify({
   cirurgias_anteriores,
   habitos,
   historico_genetico
- })}
+})}
 `;
 
     const respostaCorrigida = await openai.chat.completions.create({
