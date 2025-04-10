@@ -58,8 +58,7 @@ fastify.post('/atia', async (request, reply) => {
 Você receberá uma data de nascimento falada por voz em português. 
 Sua tarefa é converter isso para o formato dd/mm/aaaa. 
 Retorne apenas a data formatada corretamente. 
-Exemplo de entrada: "dois de maio de mil novecentos e noventa e sete"
-Saída esperada: 02/05/1997
+Exemplo: "dois de maio de mil novecentos e noventa e sete", converteria para: 02/05/1997
 
 Entrada: ${idade}
     `;
@@ -77,7 +76,64 @@ Entrada: ${idade}
     console.error("Erro ao converter a idade:", erro.message);
   }
 
-  const prompt = `
+  // Revisar sintomas, temperatura, dor e alergias
+  try {
+   try {
+  const promptRevisao = `
+Você é um corretor ortográfico médico. Irei te enviar um objeto JSON com dados de um paciente. Corrija **apenas os VALORES RECEBIDOS** do objeto. **Não altere as chaves. Não adicione ou remova campos.**
+
+Regras:
+- Corrija ortografia, pontuação e gramática conforme as normas do português brasileiro.
+- Nomes próprios devem começar com letra maiúscula.
+- Converta números por extenso para numerais (ex: "trinta e seis ponto oito" → "36.8").
+- Separe com vírgulas onde necessário, como em "perna, 10".
+- Para **alergias**: 
+   - Se o valor for "não" ou "nenhuma", retorne exatamente: "o paciente não informou quadros de alergias."
+   - Caso contrário, retorne: "o paciente tem alergia(s) a: ..."
+
+Retorne apenas o JSON corrigido:
+
+${JSON.stringify({
+  nome,
+  genero,
+  sintomas,
+  temperatura,
+  dor,
+  alergias,
+  doencas_preexistentes,
+  uso_medicamentos,
+  cirurgias_anteriores,
+  habitos,
+  historico_genetico
+})}
+`;
+
+  const respostaCorrigida = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: promptRevisao }],
+    max_tokens: 1000
+  });
+
+  const corrigido = JSON.parse(respostaCorrigida.choices[0].message.content.trim());
+
+  nome = corrigido.nome;
+  genero = corrigido.genero;
+  sintomas = corrigido.sintomas;
+  temperatura = corrigido.temperatura;
+  dor = corrigido.dor;
+  alergias = corrigido.alergias;
+  doencas_preexistentes = corrigido.doencas_preexistentes;
+  uso_medicamentos = corrigido.uso_medicamentos;
+  cirurgias_anteriores = corrigido.cirurgias_anteriores;
+  habitos = corrigido.habitos;
+  historico_genetico = corrigido.historico_genetico;
+
+  console.log("Campos revisados com sucesso.");
+} catch (erro) {
+  console.error("Erro ao revisar os dados:", erro.message);
+}
+
+    const prompt = `
 Você é a ATIA, uma Assistente de Triagem Médica Inteligente, especializada em análise de sintomas e risco clínico com base no Protocolo de Manchester.
 
 Você receberá os seguintes dados do paciente:
@@ -118,13 +174,11 @@ Com base nessas informações, forneça uma avaliação clara e objetiva, respon
     const respostaIA = completion.choices[0].message.content;
     const nomePDF = `ficha_ATIA_${Date.now()}.pdf`;
 
-    // RESPOSTA IMEDIATA para a Skill com o diagnóstico
     reply.send({
       diagnostico: respostaIA,
-      status: 'Diagnóstico concluído com sucesso. A ficha será enviada por e-mail separadamente.'
+      status: 'Análise finalizada com sucesso. A ficha será enviada por e-mail separadamente.'
     });
 
-    // 2. Envia os dados ao Glitch para gerar e enviar o PDF separadamente
     axios.post('https://ficha-pdf.glitch.me/gerar-pdf', {
       nome,
       idade,
