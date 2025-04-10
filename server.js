@@ -76,9 +76,9 @@ Entrada: ${idade}
     console.error("Erro ao converter a idade:", erro.message);
   }
 
-  // Revisar sintomas, temperatura, dor e alergias
+  // Revisar campos do paciente
   try {
-  const promptRevisao = `
+    const promptRevisao = `
 Você é um corretor ortográfico médico. Irei te enviar um objeto JSON com dados de um paciente. Corrija **apenas os VALORES RECEBIDOS** do objeto. **Não altere as chaves. Não adicione ou remova campos.**
 
 Regras:
@@ -104,60 +104,35 @@ ${JSON.stringify({
   cirurgias_anteriores,
   habitos,
   historico_genetico
-})}
+ })}
 `;
 
-  const respostaCorrigida = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: promptRevisao }],
-    max_tokens: 700
-  });
+    const respostaCorrigida = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: promptRevisao }],
+      max_tokens: 700
+    });
 
-  const corrigido = JSON.parse(respostaCorrigida.choices[0].message.content.trim());
+    const corrigido = JSON.parse(respostaCorrigida.choices[0].message.content.trim());
 
-  // Atualiza os campos
-  nome = corrigido.nome;
-  genero = corrigido.genero;
-  sintomas = corrigido.sintomas;
-  temperatura = corrigido.temperatura;
-  dor = corrigido.dor;
-  alergias = corrigido.alergias;
-  doencas_preexistentes = corrigido.doencas_preexistentes;
-  uso_medicamentos = corrigido.uso_medicamentos;
-  cirurgias_anteriores = corrigido.cirurgias_anteriores;
-  habitos = corrigido.habitos;
-  historico_genetico = corrigido.historico_genetico;
+    nome = corrigido.nome;
+    genero = corrigido.genero;
+    sintomas = corrigido.sintomas;
+    temperatura = corrigido.temperatura;
+    dor = corrigido.dor;
+    alergias = corrigido.alergias;
+    doencas_preexistentes = corrigido.doencas_preexistentes;
+    uso_medicamentos = corrigido.uso_medicamentos;
+    cirurgias_anteriores = corrigido.cirurgias_anteriores;
+    habitos = corrigido.habitos;
+    historico_genetico = corrigido.historico_genetico;
 
-} catch (erro) {
-  console.error("Erro ao revisar os dados:", erro.message);
-}
-    
-  const respostaCorrigida = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: promptRevisao }],
-    max_tokens: 1000
-  });
+    console.log("Campos revisados com sucesso.");
+  } catch (erro) {
+    console.error("Erro ao revisar os dados:", erro.message);
+  }
 
-  const corrigido = JSON.parse(respostaCorrigida.choices[0].message.content.trim());
-
-  nome = corrigido.nome;
-  genero = corrigido.genero;
-  sintomas = corrigido.sintomas;
-  temperatura = corrigido.temperatura;
-  dor = corrigido.dor;
-  alergias = corrigido.alergias;
-  doencas_preexistentes = corrigido.doencas_preexistentes;
-  uso_medicamentos = corrigido.uso_medicamentos;
-  cirurgias_anteriores = corrigido.cirurgias_anteriores;
-  habitos = corrigido.habitos;
-  historico_genetico = corrigido.historico_genetico;
-
-  console.log("Campos revisados com sucesso.");
-} catch (erro) {
-  console.error("Erro ao revisar os dados:", erro.message);
-}
-
-    const prompt = `
+  const prompt = `
 Você é a ATIA, uma Assistente de Triagem Médica Inteligente, especializada em análise de sintomas e risco clínico com base no Protocolo de Manchester.
 
 Você receberá os seguintes dados do paciente:
