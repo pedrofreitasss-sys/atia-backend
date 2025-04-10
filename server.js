@@ -78,7 +78,6 @@ Entrada: ${idade}
 
   // Revisar sintomas, temperatura, dor e alergias
   try {
-   try {
   const promptRevisao = `
 Você é um corretor ortográfico médico. Irei te enviar um objeto JSON com dados de um paciente. Corrija **apenas os VALORES RECEBIDOS** do objeto. **Não altere as chaves. Não adicione ou remova campos.**
 
@@ -108,6 +107,31 @@ ${JSON.stringify({
 })}
 `;
 
+  const respostaCorrigida = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: promptRevisao }],
+    max_tokens: 700
+  });
+
+  const corrigido = JSON.parse(respostaCorrigida.choices[0].message.content.trim());
+
+  // Atualiza os campos
+  nome = corrigido.nome;
+  genero = corrigido.genero;
+  sintomas = corrigido.sintomas;
+  temperatura = corrigido.temperatura;
+  dor = corrigido.dor;
+  alergias = corrigido.alergias;
+  doencas_preexistentes = corrigido.doencas_preexistentes;
+  uso_medicamentos = corrigido.uso_medicamentos;
+  cirurgias_anteriores = corrigido.cirurgias_anteriores;
+  habitos = corrigido.habitos;
+  historico_genetico = corrigido.historico_genetico;
+
+} catch (erro) {
+  console.error("Erro ao revisar os dados:", erro.message);
+}
+    
   const respostaCorrigida = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: [{ role: 'user', content: promptRevisao }],
